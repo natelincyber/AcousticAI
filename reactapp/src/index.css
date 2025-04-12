@@ -1,0 +1,419 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Mono:wght@400;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer base {
+  :root {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    
+    --primary: 252 87% 67%;
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 217 33% 17%;
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 215 27% 16%;
+    --muted-foreground: 217 10% 64%;
+    
+    --accent: 216 34% 17%;
+    --accent-foreground: 0 0% 98%;
+    
+    --destructive: 0 63% 31%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 224 76% 48%;
+    
+    --radius: 0.75rem;
+
+    --record-red: 0 73% 53%;
+    --pause-yellow: 44 96% 55%;
+    --play-green: 142 71% 45%;
+    --stop-blue: 218 100% 63%;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-slate-900 to-slate-800 text-slate-50 min-h-screen font-sans;
+    background-image: 
+      linear-gradient(to bottom right, #1a1f2c, #221f26),
+      url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23333333' fill-opacity='0.1' fill-rule='evenodd'/%3E%3C/svg%3E");
+  }
+}
+
+@layer components {
+  .cassette-body {
+    @apply bg-gradient-to-b from-slate-700/90 to-slate-800/90 rounded-xl border border-slate-600/80 shadow-lg overflow-hidden relative;
+    box-shadow: 
+      0 10px 25px -5px rgba(0, 0, 0, 0.3),
+      0 10px 10px -5px rgba(0, 0, 0, 0.2),
+      inset 0 1px 1px rgba(255, 255, 255, 0.1);
+    background-image: 
+      linear-gradient(to bottom, rgba(80, 80, 90, 0.9), rgba(40, 40, 50, 0.9)),
+      url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23333333' fill-opacity='0.1' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  
+  /* Screws in the corners */
+  .cassette-body::before,
+  .cassette-body::after {
+    content: '';
+    @apply absolute w-3 h-3 rounded-full bg-slate-600;
+    background: radial-gradient(circle at center, #666, #444);
+    box-shadow: 
+      inset 0 0 2px rgba(0, 0, 0, 0.5),
+      0 1px 2px rgba(255, 255, 255, 0.1);
+  }
+  
+  .cassette-body::before {
+    @apply top-3 left-3;
+  }
+  
+  .cassette-body::after {
+    @apply top-3 right-3;
+  }
+
+  /* Additional screws at the bottom */
+  .cassette-body .screws-bottom::before,
+  .cassette-body .screws-bottom::after {
+    content: '';
+    @apply absolute w-3 h-3 rounded-full;
+    background: radial-gradient(circle at center, #666, #444);
+    box-shadow: 
+      inset 0 0 2px rgba(0, 0, 0, 0.5),
+      0 1px 2px rgba(255, 255, 255, 0.1);
+  }
+  
+  .cassette-body .screws-bottom::before {
+    @apply bottom-3 left-3;
+  }
+  
+  .cassette-body .screws-bottom::after {
+    @apply bottom-3 right-3;
+  }
+
+  .cassette-backdrop {
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI2MCIgdmlld0JveD0iMCAwIDQwMCAyNjAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PHJlY3Qgd2lkdGg9IjQwMCIgaGVpZ2h0PSIyNjAiIHJ4PSIxNSIgZmlsbD0iIzFjMjQzMSIvPjxyZWN0IHg9IjEzMCIgeT0iNzAiIHdpZHRoPSIxNDAiIGhlaWdodD0iODAiIGZpbGw9IiMxMDE4MjQiLz48Y2lyY2xlIGN4PSI5MCIgY3k9IjExMCIgcj0iNDUiIGZpbGw9IiMxMDE4MjQiLz48Y2lyY2xlIGN4PSIzMTAiIGN5PSIxMTAiIHI9IjQ1IiBmaWxsPSIjMTAxODI0Ii8+PHJlY3QgeD0iNjAiIHk9IjM1IiB3aWR0aD0iMjgwIiBoZWlnaHQ9IjM1IiByeD0iNSIgZmlsbD0iIzJhMzQ0NCIvPjxyZWN0IHg9IjE3NSIgeT0iMTgyIiB3aWR0aD0iNTAiIGhlaWdodD0iMTUiIGZpbGw9IiMyYTM0NDQiLz48Y2lyY2xlIGN4PSIzNzAiIGN5PSIyMjAiIHI9IjUiIGZpbGw9IiM0YTU1NjgiLz48Y2lyY2xlIGN4PSIzNTAiIGN5PSIyMjAiIHI9IjUiIGZpbGw9IiM0YTU1NjgiLz48L3N2Zz4=');
+    @apply bg-center bg-cover bg-no-repeat opacity-20;
+    border-radius: 15px;
+  }
+
+  .cassette-window {
+    @apply bg-slate-900/70 rounded-md border border-slate-700 backdrop-blur-sm;
+    background-image: 
+      linear-gradient(to bottom, rgba(30, 30, 40, 0.7), rgba(10, 10, 15, 0.8)),
+      url("data:image/svg+xml,%3Csvg width='20' height='20' viewBox='0 0 20 20' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23333333' fill-opacity='0.05' fill-rule='evenodd'%3E%3Ccircle cx='3' cy='3' r='3'/%3E%3Ccircle cx='13' cy='13' r='3'/%3E%3C/g%3E%3C/svg%3E");
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.5),
+      0 1px 2px rgba(255, 255, 255, 0.05);
+  }
+
+  .cassette-edge-details {
+    @apply absolute inset-x-8 h-1 bg-slate-600/40;
+    background: linear-gradient(to right, 
+      rgba(80, 80, 90, 0.2), 
+      rgba(120, 120, 140, 0.4) 20%, 
+      rgba(120, 120, 140, 0.4) 80%, 
+      rgba(80, 80, 90, 0.2)
+    );
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+  }
+  
+  .cassette-edge-top {
+    @apply top-14;
+  }
+  
+  .cassette-edge-bottom {
+    @apply bottom-14;
+  }
+
+  .cassette-reel {
+    @apply rounded-full border-6 border-slate-700 relative;
+    background: radial-gradient(circle at 40% 40%, 
+      #444, #333 60%, #222);
+    box-shadow: 
+      inset 0 2px 4px rgba(0, 0, 0, 0.8),
+      0 1px 2px rgba(255, 255, 255, 0.05);
+  }
+
+  .reel-hole {
+    @apply absolute inset-1/4 rounded-full bg-black border-4 border-slate-800;
+    background: radial-gradient(circle at 30% 30%, #222, #111);
+    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.8);
+  }
+
+  .reel-spoke {
+    @apply absolute w-0.5 bg-slate-700 top-0 bottom-0 left-1/2 -translate-x-1/2;
+  }
+
+  .reel-teeth {
+    @apply absolute inset-0 rounded-full;
+    background-image: repeating-conic-gradient(
+      from 0deg,
+      transparent 0deg 5deg,
+      rgba(255, 255, 255, 0.1) 5deg 10deg
+    );
+  }
+
+  .reel-shine {
+    @apply absolute inset-0 rounded-full bg-gradient-to-br from-white/15 via-transparent to-transparent;
+    box-shadow: inset 2px 2px 4px rgba(255, 255, 255, 0.1);
+  }
+
+  .magnetic-tape {
+    @apply absolute left-0 right-0 h-1 bottom-8 opacity-40;
+    background: linear-gradient(90deg, 
+      transparent 0%, 
+      rgba(0, 0, 0, 0) 10%, 
+      rgba(40, 40, 40, 1) 20%, 
+      rgba(40, 40, 40, 1) 80%, 
+      rgba(0, 0, 0, 0) 90%, 
+      transparent 100%
+    );
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  }
+
+  .tape-moving {
+    animation: tape-movement 2s linear infinite;
+  }
+
+  .cassette-label {
+    @apply rounded-md border border-slate-600/80 backdrop-blur-sm relative overflow-hidden;
+    background: 
+      linear-gradient(120deg, rgba(70, 60, 110, 0.4), rgba(100, 70, 130, 0.4)),
+      url("data:image/svg+xml,%3Csvg width='52' height='26' viewBox='0 0 52 26' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M10 10c0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6h2c0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4 3.314 0 6 2.686 6 6 0 2.21 1.79 4 4 4v2c-3.314 0-6-2.686-6-6 0-2.21-1.79-4-4-4-3.314 0-6-2.686-6-6zm25.464-1.95l8.486 8.486-1.414 1.414-8.486-8.486 1.414-1.414z' /%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.1),
+      0 1px 2px rgba(0, 0, 0, 0.2);
+  }
+  
+  .cassette-label::before {
+    content: '';
+    @apply absolute inset-0 bg-gradient-to-b from-white/10 to-transparent opacity-70;
+  }
+
+  .cassette-notches {
+    @apply absolute bottom-0 left-1/2 -translate-x-1/2 w-12 h-3 bg-slate-700 rounded-t-md;
+    background: linear-gradient(to bottom, #555, #444);
+    box-shadow: 
+      inset 0 1px 2px rgba(0, 0, 0, 0.5),
+      0 -1px 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .cassette-controls {
+    @apply bg-slate-800/50 py-3 px-4 rounded-full border border-slate-700/50;
+    background: 
+      linear-gradient(to bottom, rgba(40, 40, 50, 0.8), rgba(20, 20, 30, 0.9)),
+      url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23333333' fill-opacity='0.1' fill-rule='evenodd'%3E%3Cpath d='M0 40L40 0H20L0 20M40 40V20L20 40'/%3E%3C/g%3E%3C/svg%3E");
+    box-shadow: 
+      inset 0 1px 1px rgba(255, 255, 255, 0.05),
+      0 2px 4px rgba(0, 0, 0, 0.2);
+  }
+
+  .control-button {
+    @apply flex items-center justify-center rounded-full w-14 h-14 text-white border shadow-md transition-all;
+    border-color: rgba(0, 0, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .control-button::after {
+    content: '';
+    @apply absolute inset-0 rounded-full;
+    background: radial-gradient(circle at 30% 30%, 
+      rgba(255, 255, 255, 0.2) 0%, 
+      transparent 70%);
+  }
+
+  .control-button-highlight {
+    @apply absolute top-0 left-0 right-0 h-1/3 bg-gradient-to-b from-white/20 to-transparent rounded-t-full;
+    pointer-events: none;
+  }
+
+  .control-button-shadow {
+    @apply absolute bottom-0 left-0 right-0 h-1/3 bg-gradient-to-t from-black/20 to-transparent rounded-b-full;
+    pointer-events: none;
+  }
+
+  .control-button:active {
+    transform: translateY(2px);
+    box-shadow: 
+      0 1px 2px rgba(0, 0, 0, 0.2),
+      inset 0 1px 5px rgba(0, 0, 0, 0.5),
+      inset 0 -1px 1px rgba(255, 255, 255, 0.1);
+  }
+
+  .control-button:active::after {
+    opacity: 0.5;
+  }
+
+  .control-button-record {
+    @apply bg-[hsl(var(--record-red))] hover:bg-[hsl(var(--record-red)/0.9)];
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.3), 
+      0 2px 4px -1px rgba(0, 0, 0, 0.2),
+      inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .control-button-pause {
+    @apply bg-[hsl(var(--pause-yellow))] hover:bg-[hsl(var(--pause-yellow)/0.9)];
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.3), 
+      0 2px 4px -1px rgba(0, 0, 0, 0.2),
+      inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .control-button-play {
+    @apply bg-[hsl(var(--play-green))] hover:bg-[hsl(var(--play-green)/0.9)];
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.3), 
+      0 2px 4px -1px rgba(0, 0, 0, 0.2),
+      inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .control-button-stop {
+    @apply bg-[hsl(var(--stop-blue))] hover:bg-[hsl(var(--stop-blue)/0.9)];
+    box-shadow: 
+      0 4px 6px -1px rgba(0, 0, 0, 0.3), 
+      0 2px 4px -1px rgba(0, 0, 0, 0.2),
+      inset 0 1px 1px rgba(255, 255, 255, 0.2);
+  }
+
+  .glass-panel {
+    @apply bg-white/5 backdrop-blur-sm border border-white/10 rounded-xl shadow-lg;
+  }
+
+  .led {
+    @apply w-2 h-2 rounded-full;
+  }
+
+  .led-off {
+    @apply bg-slate-700;
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.8);
+  }
+
+  .led-on {
+    @apply animate-pulse shadow-lg;
+    background: radial-gradient(circle at center, #4ade80, #15803d);
+    box-shadow: 0 0 5px #4ade80, 0 0 10px #4ade80/50;
+  }
+
+  .vu-meter {
+    @apply mb-2;
+  }
+
+  .needle {
+    @apply h-6 w-1 rounded-full origin-bottom;
+    background: linear-gradient(to bottom, #ef4444, #b91c1c);
+    transform: rotate(0deg);
+    position: absolute;
+    bottom: 50%;
+    right: 10%;
+    box-shadow: 0 0 5px rgba(255, 0, 0, 0.5);
+  }
+
+  .animate-needle {
+    transition: transform 150ms ease;
+  }
+  
+  /* Vintage styled VU meter background */
+  .vu-meter-bg {
+    background: linear-gradient(to right, 
+      rgba(10, 10, 15, 0.8) 0%,
+      rgba(30, 30, 40, 0.8) 2%,
+      rgba(30, 30, 40, 0.8) 98%,
+      rgba(10, 10, 15, 0.8) 100%
+    );
+    border-radius: 2px;
+    box-shadow: 
+      inset 0 1px 3px rgba(0, 0, 0, 0.7),
+      0 1px 1px rgba(255, 255, 255, 0.05);
+  }
+
+  /* Vintage LED style */
+  .vintage-led {
+    box-shadow: 0 0 2px currentColor;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+  
+  .text-gradient {
+    @apply bg-clip-text text-transparent bg-gradient-to-r from-purple-400 to-pink-400;
+  }
+
+  .cassette-reflection {
+    @apply absolute inset-0 bg-gradient-to-b from-white/10 to-transparent pointer-events-none;
+    background: linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.15) 0%,
+      rgba(255, 255, 255, 0.05) 30%,
+      transparent 70%
+    );
+  }
+
+  .border-6 {
+    border-width: 6px;
+  }
+  
+  /* Vintage texture overlay */
+  .vintage-texture {
+    @apply absolute inset-0 pointer-events-none mix-blend-overlay opacity-10;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4' viewBox='0 0 4 4'%3E%3Cpath fill='%23ffffff' fill-opacity='0.4' d='M1 3h1v1H1V3zm2-2h1v1H3V1z'%3E%3C/path%3E%3C/svg%3E");
+  }
+  
+  .grain-overlay {
+    @apply absolute inset-0 pointer-events-none mix-blend-overlay opacity-5;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  }
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.spin-slow {
+  animation: spin 4s linear infinite;
+}
+
+.spin-slower {
+  animation: spin 4.5s linear infinite;
+}
+
+@keyframes vu-meter {
+  0% { height: 15%; }
+  10% { height: 30%; }
+  20% { height: 60%; }
+  30% { height: 80%; }
+  40% { height: 40%; }
+  50% { height: 70%; }
+  60% { height: 20%; }
+  70% { height: 30%; }
+  80% { height: 50%; }
+  90% { height: 30%; }
+  100% { height: 15%; }
+}
+
+@keyframes tape-movement {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(1px); }
+  100% { transform: translateY(0); }
+}
+
+.animate-vu-meter {
+  animation: vu-meter 2s ease-in-out infinite;
+}
