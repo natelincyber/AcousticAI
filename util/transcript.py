@@ -40,13 +40,3 @@ if __name__ == "__main__":
     
     print("Transcript:")
     print(transcript)
-    # Extract the transcript text from the verbose JSON output.
-    # transcript_text = transcript.text if transcript.text is not None else ""
-    # output_file = "transcript.txt"
-
-    # if transcript_text:
-    #     with open(output_file, "w", encoding="utf-8") as f:
-    #         f.write(transcript_text)
-    #     print(f"Transcript written to {output_file}")
-    # else:
-    #     print("No transcript text produced.")

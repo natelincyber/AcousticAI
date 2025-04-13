@@ -1,6 +1,8 @@
 import re
 import wave
 import string
+import librosa
+import numpy as np
 from typing import List, Dict
 from collections import Counter
 from collections import defaultdict
@@ -94,6 +96,27 @@ def calculate_wpm(wav_path: str, transcript: str) -> float:
         print(f"Error calculating WPM: {e}")
         return 0.0
 
+def do_pitch_analysis(audio_path, plot_pitch=True, return_transcript=False):
+    # Load audio
+    y, sr = librosa.load(audio_path)
+    duration = librosa.get_duration(y=y, sr=sr)
+    print(f"\n--- Audio Info ---")
+    print(f"Duration: {duration:.2f} seconds")
+
+    # --- Pitch Estimation ---
+    f0, voiced_flag, voiced_probs = librosa.pyin(
+        y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7')
+    )
+    times = librosa.times_like(f0)
+
+    voiced_f0 = f0[~np.isnan(f0)]
+    if len(voiced_f0) > 0:
+        avg_pitch = np.mean(voiced_f0)
+        print(f"Average pitch: {avg_pitch:.2f} Hz")
+    else:
+        print("No voiced segments detected.")
+        avg_pitch = 0
+
 
 def calculate_emotion_percentages(emotion_segments: list, use_full_names: bool = True) -> dict:
 
@@ -157,10 +180,14 @@ def run_full_analysis(transcript: str, wav_path: str, emotion_segments: list = N
     print("filler done")
 
     results["wpm"] = calculate_wpm(wav_path, transcript)
+
     print("wpm done")
+
     if emotion_segments:
         results["emotion_percentages"] = calculate_emotion_percentages(emotion_segments)
     else:
         results["emotion_percentages"] = {}
+
+    print("emotion done")
 
     return results
