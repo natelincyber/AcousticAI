@@ -10,11 +10,10 @@ class EmotionDiarizer:
 
     def analyze(self, file_path):
         diarization = self.classifier.diarize_file(file_path)
-        # Convert result to JSON-friendly format
         results = diarization.get(file_path, [])
-        return json.dumps(results, indent=2)
+        return results
 
-# Example usage:
+
 if __name__ == "__main__":
     diarizer = EmotionDiarizer()
     result_json = diarizer.analyze("./uploads/recording.wav")

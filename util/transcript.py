@@ -5,40 +5,33 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+import openai
+from openai import OpenAI
+from dotenv import load_dotenv
 
+load_dotenv()
+
+client = OpenAI()
 
 def transcribe_webm_file(webm_path: str) -> str:
-    """
-    Transcribe a WebM audio file using OpenAI's Whisper API (via transcriptions.create).
-    
-    Parameters:
-        webm_path (str): Path to the .webm audio file.
-        
-    Returns:
-        str: The raw transcript including stutters, filler words, and hesitations.
-    """
-
-    client = OpenAI()
     try:
         with open(webm_path, "rb") as audio_file:
-            # Custom prompt instructs the model to preserve the raw spoken elements.
             prompt = (
                 "Transcribe the audio exactly as spoken. "
-                "Preserve all raw speech elements including stutters (stuttered words such as 'T-t-t-the'), hesitations, filler words (e.g., 'um', 'uh', 'like'), "
-                "pauses, and elongated words. Do not correct or normalize the spoken language."
+                "Preserve all raw speech elements including stutters, filler words, hesitations, and elongated words. "
+                "Do not correct or normalize the spoken language."
             )
-
-            
             transcription = client.audio.transcriptions.create(
                 model="whisper-1",
                 file=audio_file,
                 prompt=prompt,
-                response_format="verbose_json"  # Returns a plain text transcript.
+                response_format="text"
             )
         return transcription
     except Exception as e:
         print("Error during transcription:", str(e))
-        return ""
+        return "Transcription failed."
+
 
 if __name__ == "__main__":
     

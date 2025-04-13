@@ -4,7 +4,12 @@ from flask_cors import CORS
 import os
 from moviepy.editor import AudioFileClip
 from util.emotionClassifier import EmotionDiarizer
-import json
+from util.transcript import transcribe_webm_file
+from util.nlp import run_full_analysis
+from dotenv import load_dotenv
+
+load_dotenv()
+
 
 app = Flask(__name__, static_folder="reactapp/dist", static_url_path="")
 CORS(app)
@@ -56,9 +61,7 @@ def upload_and_transcribe():
     sid = request.args.get("sid")
 
     webm_path, wav_path = save_file(file, sid)
-
-    socketio.start_background_task(run_emotion_analysis, wav_path=wav_path, sid=sid)
-
+    socketio.start_background_task(full_audio_pipeline, webm_path=webm_path, wav_path=wav_path, sid=sid)
 
 
     return jsonify({
@@ -67,15 +70,29 @@ def upload_and_transcribe():
     }), 200
 
     
+def full_audio_pipeline(webm_path, wav_path, sid):
+    try:
+        socketio.emit("transcription_status", {"status": "started"}, to=sid)
+        transcript = transcribe_webm_file(webm_path)
+        socketio.emit("transcription_status", {"status": "completed"}, to=sid)
+        
 
-    
+        socketio.emit("emotion_status", {"status": "started"}, to=sid)
+        emotion = diarizer.analyze(wav_path)
+        socketio.emit("emotion_result", {"status": "completed"}, to=sid)
+
+        
+        print(run_full_analysis(transcript, wav_path, emotion))
+
+
+    except Exception as e:
+        socketio.emit("emotion_result", {"status": "error", "error": str(e)}, to=sid)
 
 def save_file(file, sid):
-    
-
     filename = file.filename
     webm_path = os.path.join(UPLOAD_FOLDER, filename)
     wav_path = os.path.join(UPLOAD_FOLDER, filename.rsplit('.', 1)[0] + '.wav')
+    print(wav_path)
 
     file.save(webm_path)
 
@@ -91,21 +108,6 @@ def save_file(file, sid):
     
     return webm_path, wav_path
 
-
-def run_emotion_analysis(wav_path, sid):
-    try:
-        results_json = diarizer.analyze(wav_path)
-        print(results_json)
-        socketio.emit("emotion_result", {
-            "status": "completed",
-            "results": json.loads(results_json),
-        }, to=sid)
-        
-    except Exception as e:
-        socketio.emit("emotion_result", {
-            "status": "error",
-            "error": str(e)
-        }, to=sid)
 
 if __name__ == '__main__':
     socketio.run(app, debug=True)
