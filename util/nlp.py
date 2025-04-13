@@ -24,6 +24,7 @@ FILLER_WORDS = {
     "uhhh", "ummm", "huh", "hmmm", "meh"
 }
 
+
 EMOTION_MAP = {
     "a": "Angry",
     "n": "Neutral",
@@ -31,35 +32,62 @@ EMOTION_MAP = {
     "h": "Happy"
 }
 
-def analyze_transcript_llm(transcript: str) -> NLPAnalysis:
+def analyze_transcript_llm(transcript: str, analytics) -> NLPAnalysis:
+
     prompt = PromptTemplate(
-        """You are a speaking coach assistant.
+    """You are an experienced speaking coach assistant giving advice.
 
-        Your task is to analyze the provided speech transcript and return a structured analysis with:
-        1. Stuttered words: Look for repeated syllables, letters, or full words (e.g., "I-I-I", "t-today") and count how many times each unique stutter occurs.
-        2. Actionable comments: Provide up to 5 one-sentence suggestions. Each should be either a constructive improvement or a positive affirmation of good speaking habits.
+        You are given the following metrics extracted from a user's audio:
+        - `pitch`: {pitch_analysis}
+        - `top_words`: {top_words}
+        - `filler_words`: {filler_words}
+        - `wpm`: {wpm}
+        - `emotion_percentages`: {emotion_percentages}
 
-        Return results in the correct structured JSON format defined by the schema.
+        Your task is to analyze the following speech transcript:
+        "{transcript}"
 
-        Transcript:
-        {transcript}
-        """
-    )
+        Guidelines:
+
+            Stuttered Words:
+
+                Detect repeated beginnings (e.g., “t-today”, “I-I-I”).
+
+                Count how often each unique stutter appears.
+
+                Focus only on actual repeated speech patterns, not typos or natural repetition.
+
+            Actionable Comments:
+
+                Provide 5 total.
+
+                Each must be a short, clear sentence.
+
+                Use speech metrics (e.g., high WPM, monotone pitch, overuse of fillers) to guide improvement suggestions.
+
+                Use transcript content and metrics (e.g., varied emotion, strong delivery, clear vocabulary) to give affirmations.
+
+        Begin your structured analysis now. """)
 
     llm = LlamaOpenAI(model="gpt-4o-mini")
     return llm.structured_predict(
         output_cls=NLPAnalysis,
         prompt=prompt,
-        transcript=transcript
+        transcript=transcript,
+        pitch=analytics["pitch_analysis"]["pitch"],
+        top_words=analytics["top_words"],
+        filler_words=analytics["filler_words"],
+        wpm=analytics["wpm"],
+        emotion_percentages=analytics["emotion_percentages"],
     )
 
-def get_top_n_words(text: str, n: int) -> List[str]:
+def get_top_n_words(text: str, n: int) -> Dict[str, int]:
     translator = str.maketrans("", "", string.punctuation)
     text_cleaned = text.translate(translator).lower()
     words = text_cleaned.split()
     word_counts = Counter(words)
     top_n = word_counts.most_common(n)
-    return [word for word, _ in top_n]
+    return {word: count for word, count in top_n}
 
 
 def get_filler_words_frequency(transcript: str, filler_words: set = FILLER_WORDS) -> Dict[str, int]:
@@ -97,63 +125,71 @@ def calculate_wpm(wav_path: str, transcript: str) -> float:
         print(f"Error calculating WPM: {e}")
         return 0.0
 
-def do_pitch_analysis(wav_path, plot_pitch=True, return_transcript=False):
-    # Load audio
+def pitch_analysis(wav_path):
     y, sr = librosa.load(wav_path)
     duration = librosa.get_duration(y=y, sr=sr)
-    print(f"\n--- Audio Info ---")
-    print(f"Duration: {duration:.2f} seconds")
 
-    # --- Pitch Estimation ---
+
     f0, voiced_flag, voiced_probs = librosa.pyin(
         y, fmin=librosa.note_to_hz('C2'), fmax=librosa.note_to_hz('C7')
     )
     times = librosa.times_like(f0)
 
+    voiced_pitches = []
+    for t, pitch in zip(times, f0):
+        if not np.isnan(pitch):
+            voiced_pitches.append({"time": round(float(t), 3), "pitch": round(float(pitch), 2)})
+
+    times = [entry["time"] for entry in voiced_pitches]
+    pitches = [entry["pitch"] for entry in voiced_pitches]
     voiced_f0 = f0[~np.isnan(f0)]
-    if len(voiced_f0) > 0:
-        avg_pitch = np.mean(voiced_f0)
-        print(f"Average pitch: {avg_pitch:.2f} Hz")
+    pitch_list = voiced_f0.tolist()
+
+    if pitch_list:
+        avg_pitch = np.mean(pitch_list)
     else:
-        print("No voiced segments detected.")
-        avg_pitch = 0
+
+        avg_pitch = 0.0
+
+    return {
+        "pitch": avg_pitch,
+        "pitch_list": pitches,
+        "pitch_timelist": times,
+        "duration": duration
+    }
 
 
 def calculate_emotion_percentages(emotion_segments: list, use_full_names: bool = True) -> dict:
 
-    # Use a set for valid emotions to check in one go
     valid_emotions = set(EMOTION_MAP.keys())
     
-    # Using defaultdict to accumulate durations by emotion
     emotion_durations = defaultdict(float)
     total_duration = 0.0
 
     def process_segment(segment):
         nonlocal total_duration
-        # Extract necessary data
         start = segment.get("start", 0.0)
         end = segment.get("end", 0.0)
         emotion = segment.get("emotion")
         
         if emotion in valid_emotions:
-            # Compute duration
             duration = end - start
             emotion_durations[emotion] += duration
             total_duration += duration
 
-    # Using ThreadPoolExecutor for parallel processing of large emotion segments
     with ThreadPoolExecutor() as executor:
         executor.map(process_segment, emotion_segments)
 
-    # If no emotion segments, return empty dictionary
     if total_duration == 0:
         return {}
 
-    # Calculate the percentage of total duration for each emotion
-    percentages = {
-        (EMOTION_MAP.get(emotion) if use_full_names else emotion): round((duration / total_duration) * 100, 2)
-        for emotion, duration in emotion_durations.items()
-    }
+    percentages = {}
+    for emotion in EMOTION_MAP:
+        key = EMOTION_MAP[emotion] if use_full_names else emotion
+        if total_duration > 0:
+            percentages[key] = round((emotion_durations[emotion] / total_duration) * 100, 2)
+        else:
+            percentages[key] = 0.0
 
     return percentages
 
@@ -161,18 +197,11 @@ def calculate_emotion_percentages(emotion_segments: list, use_full_names: bool =
 def run_full_analysis(transcript: str, wav_path: str, emotion_segments: list = None) -> dict:
     results = {}
 
-    try:
-        nlp_analysis = analyze_transcript_llm(transcript)
-        results["stuttered_words"] = [st.model_dump() for st in nlp_analysis.stuttered_words]
-        results["actionable_comments"] = [s.model_dump() for s in nlp_analysis.actionable_comments]
-    except Exception as e:
-        print(f"LLM analysis failed: {e}")
-        results["stuttered_words"] = []
-        results["actionable_comments"] = []
+    results["pitch_analysis"] = pitch_analysis(wav_path)
 
-    print("llm analysis done")
+    print("pitch analysis done")
 
-    results["top_words"] = get_top_n_words(transcript, 10)
+    results["top_words"] = get_top_n_words(transcript, 5)
 
     print("top n done")
 
@@ -190,5 +219,11 @@ def run_full_analysis(transcript: str, wav_path: str, emotion_segments: list = N
         results["emotion_percentages"] = {}
 
     print("emotion done")
+
+    nlp_analysis = analyze_transcript_llm(transcript, results)
+    results["stuttered_words"] = [st.model_dump() for st in nlp_analysis.stuttered_words]
+    results["actionable_comments"] = [s.model_dump() for s in nlp_analysis.actionable_comments]
+
+    print("llm analysis done")
 
     return results

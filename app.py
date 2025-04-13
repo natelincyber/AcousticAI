@@ -66,7 +66,6 @@ def upload_and_transcribe():
 
     return jsonify({
         "message": "File processed successfully!",
-        "filename": file.filename
     }), 200
 
     
@@ -76,17 +75,24 @@ def full_audio_pipeline(webm_path, wav_path, sid):
         transcript = transcribe_webm_file(webm_path)
         socketio.emit("transcription_status", {"status": "completed"}, to=sid)
         
-
         socketio.emit("emotion_status", {"status": "started"}, to=sid)
         emotion = diarizer.analyze(wav_path)
-        socketio.emit("emotion_result", {"status": "completed"}, to=sid)
+        socketio.emit("emotion_status", {"status": "completed"}, to=sid)
 
-        
-        print(run_full_analysis(transcript, wav_path, emotion))
+        result = run_full_analysis(transcript, wav_path, emotion)
 
+        # Emit final result to frontend
+        socketio.emit("analysis_result", {
+            "status": "completed",
+            "data": result
+        }, to=sid)
 
     except Exception as e:
-        socketio.emit("emotion_result", {"status": "error", "error": str(e)}, to=sid)
+        socketio.emit("analysis_result", {
+            "status": "error",
+            "error": str(e)
+        }, to=sid)
+
 
 def save_file(file, sid):
     filename = file.filename
