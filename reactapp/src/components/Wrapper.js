@@ -2,7 +2,7 @@ import styled from "styled-components";
 
 const Wrapper = styled.div`
   position: relative;
-  padding-top: 100px;
+  padding-top: 50px;
   overflow-x: hidden;
   background: ${props => props.vizColor};
 
