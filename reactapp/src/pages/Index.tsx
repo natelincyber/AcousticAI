@@ -56,7 +56,7 @@ const Index = () => {
 
           {/* Cassette Recorder */}
           <motion.div
-            className="w-full max-w-3xl px-4 z-20"
+            className="w-full px-4 z-20"
             style={{ translateY }}
           >
             <CassetteTape vizColor={"dark"}  />

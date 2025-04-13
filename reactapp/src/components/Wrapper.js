@@ -6,6 +6,12 @@ const Wrapper = styled.div`
   overflow-x: hidden;
   background: ${props => props.vizColor};
 
+  /* Flexbox for layout */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  
   #defaultCanvas0 {
     position: absolute;
     top: 0;
@@ -23,6 +29,14 @@ const Wrapper = styled.div`
 
   #white-bg-buttons {
     fill: #19ca90;
+  }
+
+  /* Optional: Make sure the body takes up full height and width as well */
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
   }
 `;
 

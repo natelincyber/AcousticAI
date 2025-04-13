@@ -10,6 +10,12 @@ import {
 import { ThemeProvider } from "../core/ThemeContext";
 import useAudioRecorder from "./recorder/audio-recorder";
 import Wrapper from "./Wrapper";
+import FrequentWordsChart from "./charts/FrequentWordsChart";
+import FillerWordsChart from "./charts/FillerWordsChart";
+import StutterWordsChart from "./charts/StutterWordsChart";
+import SpeechRateChart from "./charts/SpeechRateChart";
+import EmotionsChart from "./charts/EmotionsChart";
+import SpeechAdvice from "./charts/SpeechAdvice";
 
 const CassetteTape = ({ vizColor }) => {
   const {
@@ -19,7 +25,9 @@ const CassetteTape = ({ vizColor }) => {
     mediaRecorderRef,
     streamRef,
     audioChunksRef,
-    recordingTime
+    recordingTime,
+    analysisComplete,
+    analysis,
   } = useAudioRecorder();
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -91,8 +99,6 @@ const CassetteTape = ({ vizColor }) => {
 
       recorder.start();
     }
-
-    
   };
 
   const prevTrack = () => {
@@ -112,7 +118,7 @@ const CassetteTape = ({ vizColor }) => {
       <Wrapper ref={cassetteRef} className="cassette-wrapper" vizColor={vizColor}>
         <Cassette>
           <Center isPlaying={false} isRecording={isRecording} />
-          <Timebox recordingTime={recordingTime} isRecording={isRecording}/>
+          <Timebox recordingTime={recordingTime} isRecording={isRecording} />
           <TrackTitle title={playlist[currentTrack] || ""} />
           <Background />
           <Buttons
@@ -126,6 +132,28 @@ const CassetteTape = ({ vizColor }) => {
           />
         </Cassette>
       </Wrapper>
+
+      {/* Full-width container for charts */}
+      {analysisComplete && (
+        <div className="w-full bg-transparent py-8">
+          <div className="max-w-screen-xl mx-auto">
+            <h2 className="text-2xl font-bold text-center mb-8">
+              Speech Analysis Results
+            </h2>
+
+            {analysis && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <FrequentWordsChart words={analysis.top_words} />
+                <FillerWordsChart words={analysis.filler_words} />
+                <StutterWordsChart words={analysis.stuttered_words} />
+                <SpeechRateChart pitchList={analysis.pitch_analysis.pitch_list} avgPitch={analysis.wpm} timeList={analysis.pitch_analysis.pitch_timelist}/>
+                <EmotionsChart emotions={analysis.emotion_percentages} />
+                <SpeechAdvice actionableComments={analysis.actionable_comments} />
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </ThemeProvider>
   );
 };

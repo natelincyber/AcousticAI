@@ -1,6 +1,8 @@
 import { useRef, useState, useEffect } from "react";
 import { toast } from "@/components/ui/use-toast";
+import io from "socket.io-client";
 
+const socket = io("http://localhost:5000"); // Adjust if needed
 
 const formatTime = (seconds: number) => {
   const mins = Math.floor(seconds / 60);
@@ -13,14 +15,14 @@ const useAudioRecorder = () => {
   const streamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const recordingTimeRef = useRef(0); // ✅ new ref to track time
+  const recordingTimeRef = useRef(0);
 
   const [isRecording, setIsRecording] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
-  const [transcription, setTranscription] = useState("");
-  const [transcriptionComplete, setTranscriptionComplete] = useState(false);
+  const [analysisComplete, setAnalysisComplete] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
-  
+  const [analysis, setAnalysis] = useState<any>(null);
+
   const startRecording = async () => {
     console.log("🎙 startRecording called");
 
@@ -66,7 +68,7 @@ const useAudioRecorder = () => {
           const formData = new FormData();
           formData.append("audio", audioBlob, "recording.webm");
 
-          const response = await fetch("http://localhost:5000/upload", {
+          const response = await fetch(`http://localhost:5000/upload?sid=${socket.id}`, {
             method: "POST",
             body: formData,
           });
@@ -74,19 +76,7 @@ const useAudioRecorder = () => {
           if (!response.ok) throw new Error("Upload failed");
 
           const result = await response.json();
-          console.log("Transcription result:", result);
-
-          if (result.transcription) {
-            setTranscription(result.transcription);
-            setTranscriptionComplete(true);
-
-            toast({
-              title: "Analysis Complete",
-              description: "Transcription and feedback are ready!",
-            });
-          } else {
-            console.error("No transcription returned.");
-          }
+          console.log("Upload result:", result);
 
           resolve();
         } catch (err) {
@@ -103,16 +93,58 @@ const useAudioRecorder = () => {
       mediaRecorderRef.current.stop();
     });
   };
-
   useEffect(() => {
-    console.log("⏱ recordingTime:", recordingTime);
-  }, [recordingTime]);
+    if (analysis) {
+      console.log("📊 Analysis Data:", analysis);
+    }
+  }, [analysis]);
+  // 🍞 Toast listeners from backend
+  useEffect(() => {
+    socket.on("transcription_status", (data) => {
+      if (data.status === "started") {
+        toast({ title: "Transcription Started", description: "We're transcribing your audio..." });
+      } else if (data.status === "completed") {
+        toast({ title: "Transcription Complete", description: "Your transcript is ready!" });
+        
+      }
+    });
+
+    socket.on("emotion_status", (data) => {
+      if (data.status === "started") {
+        toast({ title: "Emotion Analysis Started", description: "Analyzing tone and mood..." });
+      } else if (data.status === "completed") {
+        toast({ title: "Emotion Analysis Complete", description: "Emotion profile is ready!" });
+      }
+    });
+
+    socket.on("analysis_result", (data) => {
+      if (data.status === "completed") {
+        toast({ title: "Full Analysis Ready", description: "Check out your delivery feedback!" });
+        setAnalysis(data.data);
+        setAnalysisComplete(true);
+        
+      } else if (data.status === "error") {
+        toast({
+          title: "Analysis Failed",
+          description: data.error || "Something went wrong during processing.",
+          variant: "destructive",
+        });
+      }
+    });
+    
+
+    return () => {
+      socket.off("transcription_status");
+      socket.off("emotion_status");
+      socket.off("analysis_result");
+    };
+  }, []);
 
   return {
+    analysis,
     isRecording,
     isPaused,
-    transcription,
-    transcriptionComplete,
+    analysisComplete,
     recordingTime,
     formattedTime: formatTime(recordingTime),
     startRecording,
