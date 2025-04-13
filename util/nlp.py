@@ -2,6 +2,7 @@ import re
 import wave
 import string
 import librosa
+import soundfile as sf
 import numpy as np
 from typing import List, Dict
 from collections import Counter
@@ -96,9 +97,9 @@ def calculate_wpm(wav_path: str, transcript: str) -> float:
         print(f"Error calculating WPM: {e}")
         return 0.0
 
-def do_pitch_analysis(audio_path, plot_pitch=True, return_transcript=False):
+def do_pitch_analysis(wav_path, plot_pitch=True, return_transcript=False):
     # Load audio
-    y, sr = librosa.load(audio_path)
+    y, sr = librosa.load(wav_path)
     duration = librosa.get_duration(y=y, sr=sr)
     print(f"\n--- Audio Info ---")
     print(f"Duration: {duration:.2f} seconds")
