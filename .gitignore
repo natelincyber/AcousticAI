@@ -1,3 +1,4 @@
 uploads/
 wav2*
 util/.env
+node_modules/
